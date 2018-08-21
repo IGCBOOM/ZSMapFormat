@@ -121,6 +121,7 @@ namespace ZSMapFormat
 
             zsMapFile.MapDataLocation = binRead.ReadChars(12);
 
+
             
 
 
