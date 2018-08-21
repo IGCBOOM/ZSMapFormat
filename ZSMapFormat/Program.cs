@@ -16,6 +16,10 @@ namespace ZSMapFormat
             File.WriteAllBytes("underground.zsmap", filetest);
 
 
+            Console.WriteLine("All Done!");
+            Console.ReadLine();
+
+
         }
     }
 }

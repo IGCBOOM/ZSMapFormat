@@ -79,10 +79,10 @@ namespace ZSMapFormat
             foreach (MaterialStorage material in zs.Materials)
             {
 
-                binWrite.Write("MATERIAL" + zs.Materials.IndexOf(material).ToString());
+                binWrite.Write("MATERIAL" + zs.Materials.IndexOf(material));
                 binWrite.Write(material.MaterialPath);
                 binWrite.Write(material.Material);
-                binWrite.Write("ENDMATERIAL" + zs.Materials.IndexOf(material).ToString());
+                binWrite.Write("ENDMATERIAL" + zs.Materials.IndexOf(material));
 
             }
             binWrite.Write(zs.MapDataLocation);
