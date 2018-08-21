@@ -13,7 +13,7 @@ namespace ZSMapFormat
             FormatStructure.Zsmapfile z = FormatStructureTools.MapFileToZSMapFile(test);
 
             byte[] filetest = FormatStructureTools.ZsMapFileToBytes(z);
-            File.WriteAllBytes("underground.zsmap", filetest);
+            File.WriteAllBytes("test.zsmap", filetest);
 
 
             Console.WriteLine("All Done!");

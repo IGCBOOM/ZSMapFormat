@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Xml.Linq;
 
 namespace ZSMapFormat
 {
@@ -30,7 +32,6 @@ namespace ZSMapFormat
                 MapCreator = "BOOM",
                 Version = "V1.0",
                 MapType = 0,
-                AmountOfMaterials = 0,
                 MaterialsLocation = materialLoc,
                 Materials = new List<MaterialStorage>(),
                 MapDataLocation = mapDataLoc,
@@ -47,7 +48,7 @@ namespace ZSMapFormat
             var offset = (uint) (file.MagicHeader.Length + 8 + file.MapName.Length + 1 +
                                               file.MapCreator.Length + 1 + file.Version.Length + 1 + 1 + 4);
 
-
+            
             
             var size = System.Runtime.InteropServices.Marshal.SizeOf(file);
 
@@ -56,6 +57,11 @@ namespace ZSMapFormat
             file.FileSize = sizer;
 
             */
+
+            uint amountOfMats = (uint)file.Materials.Count;
+
+
+            file.AmountOfMaterials = amountOfMats;
 
             return file;
 
@@ -89,6 +95,38 @@ namespace ZSMapFormat
             binWrite.Write(zs.MapData.MapDataStuff);
 
             return stream.ToArray();
+
+        }
+
+        public static FormatStructure.Zsmapfile BytesToZsmapfile(byte[] z)
+        {
+
+            MemoryStream source = new MemoryStream(z);
+
+            BinaryReader binRead = new BinaryReader(source);
+
+            FormatStructure.Zsmapfile zsMapFile = new FormatStructure.Zsmapfile();
+
+            zsMapFile.MagicHeader = binRead.ReadChars(9);
+
+            zsMapFile.MapName = binRead.ReadString();
+
+            zsMapFile.MapCreator = binRead.ReadString();
+
+            zsMapFile.Version = binRead.ReadString();
+
+            zsMapFile.MapType = binRead.ReadByte();
+
+            zsMapFile.AmountOfMaterials = binRead.ReadUInt32();
+
+            zsMapFile.MapDataLocation = binRead.ReadChars(12);
+
+            
+
+
+
+
+            return zsMapFile;
 
         }
 
