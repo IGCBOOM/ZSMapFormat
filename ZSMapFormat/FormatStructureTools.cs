@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Linq;
 
 namespace ZSMapFormat
@@ -58,10 +60,18 @@ namespace ZSMapFormat
 
             */
 
+
             uint amountOfMats = (uint)file.Materials.Count;
 
-
             file.AmountOfMaterials = amountOfMats;
+
+            file.MaterialSizes = new List<int>();
+
+            file.MaterialSizes.Add(MaterialStorage.ConvertImageToByteArraySize(Image.FromFile(@"C:\Users\Carter\Desktop\Textures\ceiling01.png")));
+            file.MaterialSizes.Add(MaterialStorage.ConvertImageToByteArraySize(Image.FromFile(@"C:\Users\Carter\Desktop\Textures\ceiling01_normal.png")));
+            file.MaterialSizes.Add(MaterialStorage.ConvertImageToByteArraySize(Image.FromFile(@"C:\Users\Carter\Desktop\Textures\dev_measuregeneric02.png")));
+
+            file.MapDataSize = (ulong)file.MapData.MapDataStuff.LongLength;
 
             return file;
 
@@ -74,6 +84,8 @@ namespace ZSMapFormat
 
             BinaryWriter binWrite = new BinaryWriter(stream);
 
+            BinaryFormatter binFormatter = new BinaryFormatter();
+
             binWrite.Write(zs.MagicHeader);
             //binWrite.Write(zs.FileSize);
             binWrite.Write(zs.MapName);
@@ -82,16 +94,19 @@ namespace ZSMapFormat
             binWrite.Write(zs.MapType);
             binWrite.Write(zs.AmountOfMaterials);
             binWrite.Write(zs.MaterialsLocation);
+            foreach (int materialsize in zs.MaterialSizes)
+            {
+                binWrite.Write(materialsize);
+            }
             foreach (MaterialStorage material in zs.Materials)
             {
 
-                binWrite.Write("MATERIAL" + zs.Materials.IndexOf(material));
                 binWrite.Write(material.MaterialPath);
                 binWrite.Write(material.Material);
-                binWrite.Write("ENDMATERIAL" + zs.Materials.IndexOf(material));
 
             }
             binWrite.Write(zs.MapDataLocation);
+            binWrite.Write(zs.MapDataSize);
             binWrite.Write(zs.MapData.MapDataStuff);
 
             return stream.ToArray();
@@ -119,11 +134,41 @@ namespace ZSMapFormat
 
             zsMapFile.AmountOfMaterials = binRead.ReadUInt32();
 
-            zsMapFile.MapDataLocation = binRead.ReadChars(12);
+            zsMapFile.MaterialsLocation = binRead.ReadChars(12);
 
+            zsMapFile.MaterialSizes = new List<int>();
 
-            
+            for (int i = 0; i < zsMapFile.AmountOfMaterials; i++)
+            {
 
+                zsMapFile.MaterialSizes.Add(binRead.ReadInt32());
+
+            }
+
+            zsMapFile.Materials = new List<MaterialStorage>();
+
+            for (int i = 0; i < zsMapFile.AmountOfMaterials; i++)
+            {
+
+                int xfilesize = 0;
+                foreach (int matsize in zsMapFile.MaterialSizes)
+                {
+
+                    xfilesize = matsize;
+
+                }
+
+                zsMapFile.Materials.Add(new MaterialStorage(
+                    binRead.ReadString(),
+                    binRead.ReadBytes(xfilesize)));
+
+            }
+
+            zsMapFile.MapDataLocation = binRead.ReadChars(15);
+
+            zsMapFile.MapDataSize = binRead.ReadUInt64();
+
+            zsMapFile.MapData.MapDataStuff = binRead.ReadBytes(zsMapFile.MapDataSize);
 
 
 
